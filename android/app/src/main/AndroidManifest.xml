@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.stretches_timer">
    <application
-        android:label="stretches_timer"
+        android:label="Stretches Timer"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

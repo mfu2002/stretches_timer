@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stretches_timer/model/CountDownInfo.dart';
+import 'package:stretches_timer/screen/countdown_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -11,7 +13,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _form = GlobalKey<FormState>();
 
-  void _startTimer() {}
+  CountDownInfo _timerInfo = CountDownInfo(30, 5, 3);
+  final _initial = {'stretch': '30', 'break': '5', 'iteration': '3'};
+
+  void _startTimer() {
+    if (!_form.currentState!.validate()) return;
+    _form.currentState!.save();
+
+    Navigator.of(context)
+        .pushNamed(CountdownScreen.routeName, arguments: _timerInfo);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,77 +34,87 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _form,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Stretch Duration (sec): '),
-                Container(
-                  width: 30,
-                  child: TextFormField(
-                    decoration: const InputDecoration(hintText: '30'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a number';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Invalid number';
-                      }
-                      return null;
-                    },
-                  ),
-                )
-              ],
+            Container(
+              width: 200,
+              child: TextFormField(
+                initialValue: _initial['stretch'],
+                decoration: const InputDecoration(
+                  labelText: 'Stretch Duration (sec):',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a number';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Invalid number';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _timerInfo = CountDownInfo(
+                  int.parse(value!),
+                  _timerInfo.intervalCount,
+                  _timerInfo.breakDuration,
+                ),
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Break Duration (sec): '),
-                Container(
-                  width: 30,
-                  child: TextFormField(
-                    decoration: const InputDecoration(hintText: '10'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a number';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Invalid number';
-                      }
-                      return null;
-                    },
-                  ),
-                )
-              ],
+            Container(
+              width: 200,
+              child: TextFormField(
+                initialValue: _initial['break'],
+                decoration: const InputDecoration(
+                  labelText: 'Break Duration (sec):',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a number';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Invalid number';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _timerInfo = CountDownInfo(
+                  _timerInfo.stretchDuration,
+                  _timerInfo.intervalCount,
+                  int.parse(value!),
+                ),
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Iteration Count: '),
-                Container(
-                  width: 30,
-                  child: TextFormField(
-                    decoration: const InputDecoration(hintText: '5'),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a number';
-                      }
-                      if (int.tryParse(value) == null) {
-                        return 'Invalid number';
-                      }
-                      return null;
-                    },
-                  ),
-                )
-              ],
+            Container(
+              width: 200,
+              child: TextFormField(
+                initialValue: _initial['iteration'],
+                decoration: const InputDecoration(
+                  labelText: 'Iteration Count',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a number';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Invalid number';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _timerInfo = CountDownInfo(
+                  _timerInfo.stretchDuration,
+                  int.parse(value!),
+                  _timerInfo.breakDuration,
+                ),
+              ),
             ),
-            ElevatedButton(
-              onPressed: _startTimer,
-              child: Text('Start'),
-            )
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _startTimer,
+                child: Text('Start'),
+              ),
+            ),
           ],
         ),
       ),
