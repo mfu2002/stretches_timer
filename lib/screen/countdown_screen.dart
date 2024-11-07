@@ -99,11 +99,24 @@ class _CountdownScreenState extends State<CountdownScreen> {
               onComplete: _timerIterationCompleted,
             ),
           ),
-          ElevatedButton(
-              onPressed: () => _controller.pause(), child: const Text("Pause")),
-          ElevatedButton(
-              onPressed: () => _controller.resume(),
-              child: const Text("Resume")),
+          ValueListenableBuilder(
+              valueListenable: _controller.isPaused,
+              builder: (context, isPaused, child) {
+                return Center(
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                          onPressed:
+                              isPaused ? null : () => _controller.pause(),
+                          child: const Text("Pause")),
+                      ElevatedButton(
+                          onPressed:
+                              !isPaused ? null : () => _controller.resume(),
+                          child: const Text("Resume")),
+                    ],
+                  ),
+                );
+              })
         ],
       ),
     );
