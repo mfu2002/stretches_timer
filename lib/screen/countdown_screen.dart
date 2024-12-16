@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +17,10 @@ class CountdownScreen extends StatefulWidget {
 
 class _CountdownScreenState extends State<CountdownScreen> {
   final _controller = CountDownController();
+  bool unmuted = true;
   CountDownInfo? timerInfo;
-  bool isStretching = true;
-  int iterationCount = 0;
+  bool isStretching = false;
+  int iterationCount = 1;
   final player = AudioPlayer();
 
   @override
@@ -33,28 +36,28 @@ class _CountdownScreenState extends State<CountdownScreen> {
   }
 
   void _timerIterationCompleted() async {
-    if (!isStretching) {
-      iterationCount++;
+    if (unmuted) {
+      if (isStretching && iterationCount == timerInfo!.intervalCount) {
+        await player.play(AssetSource('applause.mp3'));
+      } else if (isStretching) {
+        await player.play(AssetSource('notification.mp3'));
+      } else {
+        await player.play(AssetSource('buzzer.wav'));
+      }
     }
 
-    if (iterationCount == timerInfo!.intervalCount) {
-      await player.play(AssetSource('applause.mp3'));
-      Navigator.of(context).pop();
-      return;
-    } else if (isStretching) {
-      await player.play(AssetSource('notification.mp3'));
-    } else {
-      await player.play(AssetSource('buzzer.wav'));
+    if (isStretching) {
+      iterationCount++;
+      if (iterationCount > timerInfo!.intervalCount) {
+        Navigator.of(context).pop();
+        return;
+      }
     }
 
     setState(() {
       isStretching = !isStretching;
       _controller.restart();
     });
-  }
-
-  void pause() {
-    _controller.pause();
   }
 
   @override
@@ -67,10 +70,27 @@ class _CountdownScreenState extends State<CountdownScreen> {
       ),
       body: Column(
         children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(""),
+              ),
+              IconButton(
+                  onPressed: () => setState(() => unmuted = !unmuted),
+                  icon: Icon(unmuted ? Icons.volume_up : Icons.volume_off))
+            ],
+          ),
           Text(
-            "${iterationCount + 1} / ${timerInfo!.intervalCount}",
+            "$iterationCount / ${timerInfo!.intervalCount}",
             style: const TextStyle(fontSize: 25),
           ),
+          Text(
+              !isStretching && iterationCount == 1
+                  ? "Get Ready"
+                  : isStretching
+                      ? "Stretch"
+                      : "Rest",
+              style: const TextStyle(fontSize: 30)),
           Center(
             child: CircularCountDownTimer(
               key: ValueKey(isStretching),
